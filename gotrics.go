@@ -57,6 +57,10 @@ func ABCSize(f *ast.FuncDecl) float64 {
 			if _, ok := r.Else.(*ast.BlockStmt); ok {
 				condition++
 			}
+		case *ast.ForStmt:
+			if r.Cond != nil {
+				condition++
+			}
 		case *ast.CaseClause, *ast.CommClause:
 			condition++
 		}

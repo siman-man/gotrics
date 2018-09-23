@@ -341,9 +341,16 @@ func fibonacci(c, quit chan int) {
 	}
 }
 `, 3.0},
+		{`
+package t
+func add() {
+	for i := 1; i < 10; i++ {
+	}
+}
+`, 2.24},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		var actual float64
 		fset := token.NewFileSet()
 		f, _ := parser.ParseFile(fset, "example.go", tt.input, parser.ParseComments)
@@ -357,7 +364,7 @@ func fibonacci(c, quit chan int) {
 		})
 
 		if actual != tt.expectedValue {
-			t.Errorf("expected=%f, got=%f", tt.expectedValue, actual)
+			t.Errorf("case %d: expected=%f, got=%f", i, tt.expectedValue, actual)
 		}
 	}
 }
