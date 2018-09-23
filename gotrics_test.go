@@ -213,7 +213,7 @@ func add() int {
 	const a, b = 10, 5
 	return a + b
 }
-`, 2.0},
+`, 0.0},
 		{`
 package t
 func add() int {
@@ -223,14 +223,14 @@ func add() int {
 	)
 	return a + b
 }
-`, 2.0},
+`, 0.0},
 		{`
 package t
 func add() int {
 	const _, b = 10, 5
 	return b
 }
-`, 1.0},
+`, 0.0},
 		{`
 package t
 func add() int {

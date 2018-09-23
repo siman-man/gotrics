@@ -28,8 +28,8 @@ func ABCSize(f *ast.FuncDecl) float64 {
 		case *ast.ValueSpec:
 			if r.Values != nil {
 				for _, i := range r.Names {
-					// not count blank identifier
-					if i.Name != "_" {
+					// not count blank identifier or const declarations
+					if i.Name != "_" && i.Obj.Kind != ast.Con {
 						assignment++
 					}
 				}
