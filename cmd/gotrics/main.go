@@ -43,8 +43,12 @@ func gotricsMain() {
 
 		switch dir, err := os.Stat(path); {
 		case err != nil:
-			fmt.Println(err)
+			exitCode = 2
+			return
 		case dir.IsDir():
+			exitCode = 2
+			fmt.Println("Not support directory path.")
+			return
 		default:
 			fset := token.NewFileSet()
 			f, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
