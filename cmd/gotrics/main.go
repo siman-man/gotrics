@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 
@@ -51,7 +54,7 @@ func gotricsMain() {
 			return
 		default:
 			fset := token.NewFileSet()
-			f, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+			f, err := parseSourceCode(fset, path)
 
 			if err != nil {
 				exitCode = 2
@@ -72,6 +75,30 @@ func gotricsMain() {
 			}
 		}
 	}
+}
+
+func parseSourceCode(fset *token.FileSet, path string) (f *ast.File, err error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	src, err := ioutil.ReadAll(file)
+	if err != nil {
+		return
+	}
+
+	f, err = parser.ParseFile(fset, path, src, parser.ParseComments)
+
+	if err == nil || !strings.Contains(err.Error(), "expected 'package'") {
+		return
+	}
+
+	psrc := append([]byte("package p;"), src...)
+	f, err = parser.ParseFile(fset, path, psrc, parser.ParseComments)
+
+	return
 }
 
 func report(data []gotrics.GoMetrics) {
