@@ -47,7 +47,12 @@ func gotricsMain() {
 		case dir.IsDir():
 		default:
 			fset := token.NewFileSet()
-			f, _ := parser.ParseFile(fset, path, nil, parser.ParseComments)
+			f, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+
+			if err != nil {
+				exitCode = 2
+				return
+			}
 
 			result := gotrics.Analyze(fset, f)
 
@@ -78,5 +83,6 @@ func report(data []gotrics.GoMetrics) {
 			strconv.FormatFloat(m.ABCSize, 'f', -1, 64),
 		})
 	}
+
 	table.Render()
 }
