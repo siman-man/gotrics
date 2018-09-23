@@ -327,6 +327,20 @@ func f() {
 	}
 }
 `, 2.0},
+		{`
+package t
+func fibonacci(c, quit chan int) {
+	for {
+		select {
+		case c <- x:
+			return
+		case <-quit:
+			return
+		default:
+		}
+	}
+}
+`, 2.0},
 	}
 
 	for _, tt := range tests {

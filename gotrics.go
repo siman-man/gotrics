@@ -58,6 +58,11 @@ func ABCSize(f *ast.FuncDecl) float64 {
 			if r.List != nil {
 				condition++
 			}
+		case *ast.CommClause:
+			// nil means default case, not count condition
+			if r.Comm != nil {
+				condition++
+			}
 		}
 		return true
 	})
