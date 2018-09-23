@@ -76,6 +76,7 @@ func MethodLength(fset *token.FileSet, n *ast.FuncDecl) int {
 	return length
 }
 
+// `switch`, `type switch`, `select` are not nesting in formatted code (gofmt)
 func MethodNesting(f *ast.FuncDecl) int {
 	var level = 0
 
