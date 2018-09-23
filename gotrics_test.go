@@ -304,7 +304,7 @@ func f() {
 	default:
 	}
 }
-`, 2.0},
+`, 3.0},
 		{`
 package t
 func f() {
@@ -314,19 +314,19 @@ func f() {
 		false
 	}
 }
-`, 1.0},
+`, 2.0},
 		{`
 package t
 func f() {
 	if x > 1 {
 		true
-	} else if {
+	} else if x < 1 {
 		true
 	} else {
 		false
 	}
 }
-`, 2.0},
+`, 3.0},
 		{`
 package t
 func fibonacci(c, quit chan int) {
@@ -340,7 +340,7 @@ func fibonacci(c, quit chan int) {
 		}
 	}
 }
-`, 2.0},
+`, 3.0},
 	}
 
 	for _, tt := range tests {
