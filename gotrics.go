@@ -149,6 +149,15 @@ func nestWalk(node ast.Node, level int) int {
 			}
 			return false
 		case *ast.SelectStmt:
+			level = int(math.Max(float64(nestWalk(r.Body, currentLevel-1)), float64(level)))
+			return false
+		case *ast.CommClause:
+			if r.Comm != nil {
+				level = int(math.Max(float64(nestWalk(r.Comm, currentLevel-1)), float64(level)))
+			}
+			for _, x := range r.Body {
+				level = int(math.Max(float64(nestWalk(x, currentLevel+1)), float64(level)))
+			}
 			return false
 		case *ast.TypeSwitchStmt:
 			return false
