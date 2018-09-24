@@ -1,11 +1,9 @@
 package gotrics
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"math"
-	"strconv"
 )
 
 type (
@@ -70,9 +68,7 @@ func ABCSize(f *ast.FuncDecl) float64 {
 	})
 
 	k := math.Sqrt(assignment*assignment + branch*branch + condition*condition)
-	i := fmt.Sprintf("%.2f", k)
-	b, _ := strconv.ParseFloat(i, 64)
-	return b
+	return math.Round(k*100) / 100
 }
 
 func MethodLength(fset *token.FileSet, n *ast.FuncDecl) int {
