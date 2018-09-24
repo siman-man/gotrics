@@ -160,6 +160,11 @@ func nestWalk(node ast.Node, level int) int {
 			}
 			return false
 		case *ast.TypeSwitchStmt:
+			if r.Init != nil {
+				level = int(math.Max(float64(nestWalk(r.Init, currentLevel-1)), float64(level)))
+			}
+			level = int(math.Max(float64(nestWalk(r.Assign, currentLevel-1)), float64(level)))
+			level = int(math.Max(float64(nestWalk(r.Body, currentLevel-1)), float64(level)))
 			return false
 		}
 		return true
