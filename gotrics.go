@@ -81,23 +81,7 @@ func MethodLength(fset *token.FileSet, n *ast.FuncDecl) int {
 
 // `switch`, `type switch`, `select` are not nesting in formatted code (gofmt)
 func MethodNesting(f *ast.FuncDecl) int {
-	var level = 0
-
-	ast.Inspect(f, func(n ast.Node) bool {
-		switch n.(type) {
-		case *ast.BlockStmt:
-			level++
-		case *ast.SwitchStmt:
-			level--
-		case *ast.SelectStmt:
-			level--
-		case *ast.TypeSwitchStmt:
-			level--
-		}
-		return true
-	})
-
-	return level
+	return nestWalk(f, 0)
 }
 
 func ParameterList(n *ast.FuncDecl) int {
@@ -135,4 +119,34 @@ func Analyze(fset *token.FileSet, f *ast.File) []GoMetrics {
 	})
 
 	return report
+}
+
+func nestWalk(node ast.Node, level int) int {
+	ast.Inspect(node, func(n ast.Node) bool {
+		var currentLevel = level
+
+		switch r := n.(type) {
+		case *ast.BlockStmt:
+			for _, x := range r.List {
+				level = int(math.Max(float64(nestWalk(x, currentLevel+1)), float64(level)))
+			}
+			return false
+		case *ast.SwitchStmt:
+			if r.Init != nil {
+				level = int(math.Max(float64(nestWalk(r, currentLevel-1)), float64(level)))
+			}
+			if r.Tag != nil {
+				level = int(math.Max(float64(nestWalk(r, currentLevel-1)), float64(level)))
+			}
+			level = int(math.Max(float64(nestWalk(r.Body, currentLevel-1)), float64(level)))
+			return false
+		case *ast.SelectStmt:
+			return false
+		case *ast.TypeSwitchStmt:
+			return false
+		}
+		return true
+	})
+
+	return level
 }

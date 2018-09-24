@@ -58,22 +58,35 @@ func add(a, b int) int {
 	return 0
 }
 `, 2},
+		{`
+package t
+func add(a, b int) int {
+	if x > 1 {
+		return 1
+	}
+	if x < 1 {
+		return 2
+	}
+	return 0
+}
+`, 2},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		var actual int
 		fset := token.NewFileSet()
 		f, _ := parser.ParseFile(fset, "example.go", tt.input, parser.ParseComments)
 
 		ast.Inspect(f, func(n ast.Node) bool {
 			if r, ok := n.(*ast.FuncDecl); ok {
+				// ast.Print(fset, r)
 				actual = MethodNesting(r)
 			}
 			return true
 		})
 
 		if actual != tt.expectedValue {
-			t.Errorf("expected=%d, got=%d", tt.expectedValue, actual)
+			t.Errorf("case %d: expected=%d, got=%d", i, tt.expectedValue, actual)
 		}
 	}
 }
