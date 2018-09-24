@@ -8,13 +8,13 @@ import (
 
 type (
 	GoMetrics struct {
-		Name      string
-		PosLine   int
-		PosColumn int
-		Length    int
-		Level     int
-		Count     int
-		ABCSize   float64
+		Name           string
+		PosLine        int
+		PosColumn      int
+		MethodLength   int
+		NestingLevel   int
+		ParameterCount int
+		ABCSize        float64
 	}
 )
 
@@ -125,9 +125,9 @@ func Analyze(fset *token.FileSet, f *ast.File) []GoMetrics {
 			gm.Name = r.Name.Name
 			gm.PosLine = namePos.Line
 			gm.PosColumn = namePos.Column
-			gm.Length = MethodLength(fset, r)
-			gm.Level = MethodNesting(r)
-			gm.Count = ParameterList(r)
+			gm.MethodLength = MethodLength(fset, r)
+			gm.NestingLevel = MethodNesting(r)
+			gm.ParameterCount = ParameterList(r)
 			gm.ABCSize = ABCSize(r)
 			report = append(report, gm)
 		}

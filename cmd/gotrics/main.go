@@ -108,9 +108,9 @@ func report(data []gotrics.GoMetrics) {
 	for _, m := range data {
 		table.Append([]string{
 			m.Name,
-			strconv.Itoa(m.Length),
-			strconv.Itoa(m.Count),
-			strconv.Itoa(m.Level),
+			strconv.Itoa(m.MethodLength),
+			strconv.Itoa(m.ParameterCount),
+			strconv.Itoa(m.NestingLevel),
 			strconv.FormatFloat(m.ABCSize, 'f', -1, 64),
 		})
 	}
