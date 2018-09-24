@@ -133,12 +133,20 @@ func nestWalk(node ast.Node, level int) int {
 			return false
 		case *ast.SwitchStmt:
 			if r.Init != nil {
-				level = int(math.Max(float64(nestWalk(r, currentLevel-1)), float64(level)))
+				level = int(math.Max(float64(nestWalk(r.Init, currentLevel-1)), float64(level)))
 			}
 			if r.Tag != nil {
-				level = int(math.Max(float64(nestWalk(r, currentLevel-1)), float64(level)))
+				level = int(math.Max(float64(nestWalk(r.Tag, currentLevel-1)), float64(level)))
 			}
 			level = int(math.Max(float64(nestWalk(r.Body, currentLevel-1)), float64(level)))
+			return false
+		case *ast.CaseClause:
+			for _, x := range r.List {
+				level = int(math.Max(float64(nestWalk(x, currentLevel+1)), float64(level)))
+			}
+			for _, x := range r.Body {
+				level = int(math.Max(float64(nestWalk(x, currentLevel+1)), float64(level)))
+			}
 			return false
 		case *ast.SelectStmt:
 			return false

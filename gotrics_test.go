@@ -70,6 +70,20 @@ func add(a, b int) int {
 	return 0
 }
 `, 2},
+		{`
+package t
+func main() {
+	fmt.Print("Go runs on ")
+	switch os := runtime.GOOS; os {
+	case "darwin":
+		fmt.Println("OS X.")
+	case "linux":
+		fmt.Println("Linux.")
+	default:
+		fmt.Printf("%s.", os)
+	}
+}
+`, 2},
 	}
 
 	for i, tt := range tests {
