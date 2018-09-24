@@ -81,7 +81,7 @@ func MethodLength(fset *token.FileSet, n *ast.FuncDecl) int {
 
 // `switch`, `type switch`, `select` are not nesting in formatted code (gofmt)
 func MethodNesting(f *ast.FuncDecl) int {
-	return nestWalk(f, 0)
+	return int(nestWalk(f, 0))
 }
 
 func ParameterList(n *ast.FuncDecl) int {
@@ -121,54 +121,71 @@ func Analyze(fset *token.FileSet, f *ast.File) []GoMetrics {
 	return report
 }
 
-func nestWalk(node ast.Node, level int) int {
+func nestWalk(node ast.Node, level float64) float64 {
 	ast.Inspect(node, func(n ast.Node) bool {
 		var currentLevel = level
 
 		switch r := n.(type) {
 		case *ast.BlockStmt:
-			for _, x := range r.List {
-				level = int(math.Max(float64(nestWalk(x, currentLevel+1)), float64(level)))
-			}
+			level = walkStmtList(r.List, currentLevel)
 			return false
+
 		case *ast.SwitchStmt:
 			if r.Init != nil {
-				level = int(math.Max(float64(nestWalk(r.Init, currentLevel-1)), float64(level)))
+				level = math.Max(float64(nestWalk(r.Init, currentLevel-1)), level)
 			}
 			if r.Tag != nil {
-				level = int(math.Max(float64(nestWalk(r.Tag, currentLevel-1)), float64(level)))
+				level = math.Max(float64(nestWalk(r.Tag, currentLevel-1)), level)
 			}
-			level = int(math.Max(float64(nestWalk(r.Body, currentLevel-1)), float64(level)))
+			level = math.Max(float64(nestWalk(r.Body, currentLevel-1)), level)
 			return false
+
 		case *ast.CaseClause:
-			for _, x := range r.List {
-				level = int(math.Max(float64(nestWalk(x, currentLevel+1)), float64(level)))
-			}
-			for _, x := range r.Body {
-				level = int(math.Max(float64(nestWalk(x, currentLevel+1)), float64(level)))
-			}
+			level = walkExprList(r.List, currentLevel)
+			level = walkStmtList(r.Body, currentLevel)
 			return false
+
 		case *ast.SelectStmt:
-			level = int(math.Max(float64(nestWalk(r.Body, currentLevel-1)), float64(level)))
+			level = math.Max(float64(nestWalk(r.Body, currentLevel-1)), level)
 			return false
+
 		case *ast.CommClause:
 			if r.Comm != nil {
-				level = int(math.Max(float64(nestWalk(r.Comm, currentLevel-1)), float64(level)))
+				level = math.Max(float64(nestWalk(r.Comm, currentLevel-1)), level)
 			}
-			for _, x := range r.Body {
-				level = int(math.Max(float64(nestWalk(x, currentLevel+1)), float64(level)))
-			}
+			level = walkStmtList(r.Body, currentLevel)
 			return false
+
 		case *ast.TypeSwitchStmt:
 			if r.Init != nil {
-				level = int(math.Max(float64(nestWalk(r.Init, currentLevel-1)), float64(level)))
+				level = math.Max(float64(nestWalk(r.Init, currentLevel-1)), level)
 			}
-			level = int(math.Max(float64(nestWalk(r.Assign, currentLevel-1)), float64(level)))
-			level = int(math.Max(float64(nestWalk(r.Body, currentLevel-1)), float64(level)))
+			level = math.Max(float64(nestWalk(r.Assign, currentLevel-1)), level)
+			level = math.Max(float64(nestWalk(r.Body, currentLevel-1)), level)
 			return false
 		}
 		return true
 	})
+
+	return level
+}
+
+func walkStmtList(list []ast.Stmt, level float64) float64 {
+	var currentLevel = level
+
+	for _, x := range list {
+		level = math.Max(float64(nestWalk(x, currentLevel+1)), level)
+	}
+
+	return level
+}
+
+func walkExprList(list []ast.Expr, level float64) float64 {
+	var currentLevel = level
+
+	for _, x := range list {
+		level = math.Max(float64(nestWalk(x, currentLevel+1)), level)
+	}
 
 	return level
 }
