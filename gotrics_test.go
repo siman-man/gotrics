@@ -112,6 +112,26 @@ func do(i interface{}) {
 	}
 }
 `, 2},
+		{`
+package t
+func do(i interface{}) {
+	noteFrequency := map[string]float32{
+		"C0": 16.35,
+		"G0": 24.50
+	}
+}
+`, 2},
+		{`
+package t
+func pow(x, n, lim float64) float64 {
+	if v := math.Pow(x, n); v < lim {
+		return v
+	} else {
+		fmt.Printf("%g >= %g\n", v, lim)
+	}
+	return lim
+}
+`, 2},
 	}
 
 	for i, tt := range tests {
@@ -122,7 +142,7 @@ func do(i interface{}) {
 		ast.Inspect(f, func(n ast.Node) bool {
 			if r, ok := n.(*ast.FuncDecl); ok {
 				// ast.Print(fset, r)
-				actual = MethodNesting(r)
+				actual = MethodNesting(fset, r)
 			}
 			return true
 		})

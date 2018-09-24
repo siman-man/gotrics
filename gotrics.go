@@ -1,9 +1,12 @@
 package gotrics
 
 import (
+	"bytes"
 	"go/ast"
+	"go/format"
 	"go/token"
 	"math"
+	"strings"
 )
 
 type (
@@ -17,6 +20,28 @@ type (
 		ABCSize        float64
 	}
 )
+
+func Analyze(fset *token.FileSet, f *ast.File) []GoMetrics {
+	report := make([]GoMetrics, 0)
+
+	ast.Inspect(f, func(n ast.Node) bool {
+		if r, ok := n.(*ast.FuncDecl); ok {
+			namePos := fset.Position(r.Name.NamePos)
+			gm := GoMetrics{}
+			gm.Name = r.Name.Name
+			gm.PosLine = namePos.Line
+			gm.PosColumn = namePos.Column
+			gm.MethodLength = MethodLength(fset, r)
+			gm.NestingLevel = MethodNesting(fset, r)
+			gm.ParameterCount = ParameterList(r)
+			gm.ABCSize = ABCSize(r)
+			report = append(report, gm)
+		}
+		return true
+	})
+
+	return report
+}
 
 func ABCSize(f *ast.FuncDecl) float64 {
 	var assignment = 0.0
@@ -80,8 +105,16 @@ func MethodLength(fset *token.FileSet, n *ast.FuncDecl) int {
 }
 
 // `switch`, `type switch`, `select` are not nesting in formatted code (gofmt)
-func MethodNesting(f *ast.FuncDecl) int {
-	return int(nestWalk(f, 0))
+func MethodNesting(fset *token.FileSet, f *ast.FuncDecl) int {
+	var level = 0.0
+	var out = new(bytes.Buffer)
+	format.Node(out, fset, f)
+
+	for _, l := range strings.Split(out.String(), "\n") {
+		level = math.Max(float64(countLeadingTab(l)), level)
+	}
+
+	return int(level)
 }
 
 func ParameterList(n *ast.FuncDecl) int {
@@ -99,93 +132,16 @@ func ParameterList(n *ast.FuncDecl) int {
 	return count
 }
 
-func Analyze(fset *token.FileSet, f *ast.File) []GoMetrics {
-	report := make([]GoMetrics, 0)
+func countLeadingTab(line string) int {
+	i := 0
 
-	ast.Inspect(f, func(n ast.Node) bool {
-		if r, ok := n.(*ast.FuncDecl); ok {
-			namePos := fset.Position(r.Name.NamePos)
-			gm := GoMetrics{}
-			gm.Name = r.Name.Name
-			gm.PosLine = namePos.Line
-			gm.PosColumn = namePos.Column
-			gm.MethodLength = MethodLength(fset, r)
-			gm.NestingLevel = MethodNesting(r)
-			gm.ParameterCount = ParameterList(r)
-			gm.ABCSize = ABCSize(r)
-			report = append(report, gm)
+	for _, runeValue := range line {
+		if runeValue == '\t' {
+			i++
+		} else {
+			break
 		}
-		return true
-	})
-
-	return report
-}
-
-func nestWalk(node ast.Node, level float64) float64 {
-	ast.Inspect(node, func(n ast.Node) bool {
-		var currentLevel = level
-
-		switch r := n.(type) {
-		case *ast.BlockStmt:
-			level = walkStmtList(r.List, currentLevel)
-			return false
-
-		case *ast.SwitchStmt:
-			if r.Init != nil {
-				level = math.Max(float64(nestWalk(r.Init, currentLevel-1)), level)
-			}
-			if r.Tag != nil {
-				level = math.Max(float64(nestWalk(r.Tag, currentLevel-1)), level)
-			}
-			level = math.Max(float64(nestWalk(r.Body, currentLevel-1)), level)
-			return false
-
-		case *ast.CaseClause:
-			level = walkExprList(r.List, currentLevel)
-			level = walkStmtList(r.Body, currentLevel)
-			return false
-
-		case *ast.SelectStmt:
-			level = math.Max(float64(nestWalk(r.Body, currentLevel-1)), level)
-			return false
-
-		case *ast.CommClause:
-			if r.Comm != nil {
-				level = math.Max(float64(nestWalk(r.Comm, currentLevel-1)), level)
-			}
-			level = walkStmtList(r.Body, currentLevel)
-			return false
-
-		case *ast.TypeSwitchStmt:
-			if r.Init != nil {
-				level = math.Max(float64(nestWalk(r.Init, currentLevel-1)), level)
-			}
-			level = math.Max(float64(nestWalk(r.Assign, currentLevel-1)), level)
-			level = math.Max(float64(nestWalk(r.Body, currentLevel-1)), level)
-			return false
-		}
-		return true
-	})
-
-	return level
-}
-
-func walkStmtList(list []ast.Stmt, level float64) float64 {
-	var currentLevel = level
-
-	for _, x := range list {
-		level = math.Max(float64(nestWalk(x, currentLevel+1)), level)
 	}
 
-	return level
-}
-
-func walkExprList(list []ast.Expr, level float64) float64 {
-	var currentLevel = level
-
-	for _, x := range list {
-		level = math.Max(float64(nestWalk(x, currentLevel+1)), level)
-	}
-
-	return level
+	return i
 }
