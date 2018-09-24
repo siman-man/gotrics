@@ -133,15 +133,15 @@ func ParameterList(n *ast.FuncDecl) int {
 }
 
 func countLeadingTab(line string) int {
-	i := 0
+	var count = 0
 
 	for _, runeValue := range line {
 		if runeValue == '\t' {
-			i++
+			count++
 		} else {
 			break
 		}
 	}
 
-	return i
+	return count
 }
