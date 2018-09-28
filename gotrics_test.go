@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestMethodLength(t *testing.T) {
+func TestFuncLength(t *testing.T) {
 	tests := []struct {
 		input         string
 		expectedValue int
@@ -27,7 +27,7 @@ func add(a, b int) int {
 
 		ast.Inspect(f, func(n ast.Node) bool {
 			if r, ok := n.(*ast.FuncDecl); ok {
-				actual = MethodLength(fset, r)
+				actual = FuncLength(fset, r)
 			}
 			return true
 		})
@@ -38,7 +38,7 @@ func add(a, b int) int {
 	}
 }
 
-func TestMethodNesting(t *testing.T) {
+func TestFuncNesting(t *testing.T) {
 	tests := []struct {
 		input         string
 		expectedValue int
@@ -142,7 +142,7 @@ func pow(x, n, lim float64) float64 {
 		ast.Inspect(f, func(n ast.Node) bool {
 			if r, ok := n.(*ast.FuncDecl); ok {
 				// ast.Print(fset, r)
-				actual = MethodNesting(fset, r)
+				actual = FuncNesting(fset, r)
 			}
 			return true
 		})

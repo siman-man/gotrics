@@ -14,7 +14,7 @@ type (
 		Name           string
 		PosLine        int
 		PosColumn      int
-		MethodLength   int
+		FuncLength     int
 		NestingLevel   int
 		ParameterCount int
 		ABCSize        float64
@@ -31,8 +31,8 @@ func Analyze(fset *token.FileSet, f *ast.File) []GoMetrics {
 			gm.Name = r.Name.Name
 			gm.PosLine = namePos.Line
 			gm.PosColumn = namePos.Column
-			gm.MethodLength = MethodLength(fset, r)
-			gm.NestingLevel = MethodNesting(fset, r)
+			gm.FuncLength = FuncLength(fset, r)
+			gm.NestingLevel = FuncNesting(fset, r)
 			gm.ParameterCount = ParameterList(r)
 			gm.ABCSize = ABCSize(r)
 			report = append(report, gm)
@@ -96,7 +96,7 @@ func ABCSize(f *ast.FuncDecl) float64 {
 	return math.Round(k*100) / 100
 }
 
-func MethodLength(fset *token.FileSet, n *ast.FuncDecl) int {
+func FuncLength(fset *token.FileSet, n *ast.FuncDecl) int {
 	sp := fset.Position(n.Body.Lbrace)
 	ep := fset.Position(n.Body.Rbrace)
 	length := ep.Line - sp.Line + 1
@@ -105,7 +105,7 @@ func MethodLength(fset *token.FileSet, n *ast.FuncDecl) int {
 }
 
 // `switch`, `type switch`, `select` are not nesting in formatted code (gofmt)
-func MethodNesting(fset *token.FileSet, f *ast.FuncDecl) int {
+func FuncNesting(fset *token.FileSet, f *ast.FuncDecl) int {
 	var level = 0.0
 	var out = new(bytes.Buffer)
 	format.Node(out, fset, f)

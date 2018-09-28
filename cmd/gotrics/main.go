@@ -103,12 +103,12 @@ func parseSourceCode(fset *token.FileSet, path string) (f *ast.File, err error) 
 
 func report(data []gotrics.GoMetrics) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Function Name", "Method Length", "Parameter Count", "Nesting Level", "ABC Size"})
+	table.SetHeader([]string{"Func Name", "Func Length", "Parameter Count", "Nesting Level", "ABC Size"})
 
 	for _, m := range data {
 		table.Append([]string{
 			m.Name,
-			strconv.Itoa(m.MethodLength),
+			strconv.Itoa(m.FuncLength),
 			strconv.Itoa(m.ParameterCount),
 			strconv.Itoa(m.NestingLevel),
 			strconv.FormatFloat(m.ABCSize, 'f', -1, 64),
