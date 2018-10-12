@@ -153,7 +153,7 @@ func pow(x, n, lim float64) float64 {
 	}
 }
 
-func TestParameterList(t *testing.T) {
+func TestParameterCount(t *testing.T) {
 	tests := []struct {
 		input         string
 		expectedValue int
@@ -217,7 +217,7 @@ func f(n int) {
 
 		ast.Inspect(f, func(n ast.Node) bool {
 			if r, ok := n.(*ast.FuncDecl); ok {
-				actual = ParameterList(r)
+				actual = ParameterCount(r)
 			}
 			return true
 		})

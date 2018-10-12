@@ -33,7 +33,7 @@ func Analyze(fset *token.FileSet, f *ast.File) []GoMetrics {
 			gm.PosColumn = namePos.Column
 			gm.FuncLength = FuncLength(fset, r)
 			gm.NestingLevel = FuncNesting(fset, r)
-			gm.ParameterCount = ParameterList(r)
+			gm.ParameterCount = ParameterCount(r)
 			gm.ABCSize = ABCSize(r)
 			report = append(report, gm)
 		}
@@ -117,7 +117,7 @@ func FuncNesting(fset *token.FileSet, f *ast.FuncDecl) int {
 	return int(level)
 }
 
-func ParameterList(n *ast.FuncDecl) int {
+func ParameterCount(n *ast.FuncDecl) int {
 	var count = 0
 
 	for _, l := range n.Type.Params.List {
