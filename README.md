@@ -7,13 +7,15 @@ Gotrics is go source analyzer.
 
 https://gotrics.herokuapp.com/
 
+Demo page works on Heroku free dyno. so, if dyno is sleeping mode, maybe page launch time is slow. (about 5 - 10 sec)
+
 
 ## Available Metrics
 
 | Name           | Description                                             |
 |:---------------|:--------------------------------------------------------|
 | FuncLength     | calc function length                                    |
-| ParameterList  | calc function parameter count (not include `_`)         |
+| ParameterCount | calc function parameter count (not include `_`)         |
 | FuncNesting    | calc function nesting level                             |
 | ABCSize        | calc function [abc size](http://wiki.c2.com/?AbcMetric) |
 
@@ -25,3 +27,18 @@ https://gotrics.herokuapp.com/
 ```
 Line count of from start `{` line number to end `}` line number.
 ```
+
+
+### ParameterCount
+
+Count a number of function arguments.
+
+
+### FuncNesting
+
+Count a number of the leading tab space.
+
+
+### ABCSize
+
+Calc abc size.
