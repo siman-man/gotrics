@@ -7,7 +7,7 @@ Gotrics is go source analyzer.
 
 https://gotrics.herokuapp.com/
 
-Demo page works on Heroku free dyno. so, if dyno is sleeping mode, maybe page launch time is slow. (about 5 - 10 sec)
+Demo page works on Heroku free dyno. so, if dyno is sleeping mode, maybe page launch time is slow. (about 30 sec)
 
 
 ## Available Metrics
